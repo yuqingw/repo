@@ -30,7 +30,17 @@ import teammates.common.util.GoogleCloudStorageHelper;
 import teammates.common.util.ThreadHelper;
 import teammates.common.util.Utils;
 import teammates.logic.api.Logic;
+import teammates.logic.core.EvaluationsLogic;
+import teammates.storage.api.AccountsDb;
+import teammates.storage.api.CommentsDb;
+import teammates.storage.api.CoursesDb;
 import teammates.storage.api.EvaluationsDb;
+import teammates.storage.api.FeedbackQuestionsDb;
+import teammates.storage.api.FeedbackResponseCommentsDb;
+import teammates.storage.api.FeedbackSessionsDb;
+import teammates.storage.api.InstructorsDb;
+import teammates.storage.api.ProfilesDb;
+import teammates.storage.api.SubmissionsDb;
 
 import com.google.appengine.api.blobstore.BlobKey;
 import com.google.appengine.api.blobstore.BlobstoreFailureException;
@@ -42,6 +52,17 @@ public class BackDoorLogic extends Logic {
     private static final int WAIT_DURATION_FOR_DELETE_CHECKING = 500;
     private static final int MAX_RETRY_COUNT_FOR_DELETE_CHECKING = 20;
     
+    private static final AccountsDb accountsDb = new AccountsDb();
+    private static final ProfilesDb profilesDb = new ProfilesDb();
+    private static final CoursesDb coursesDb = new CoursesDb();
+    private static final InstructorsDb instructorsDb = new InstructorsDb();
+    private static final SubmissionsDb submissionsDb = new SubmissionsDb();
+    private static final FeedbackSessionsDb fsDb = new FeedbackSessionsDb();
+    private static final FeedbackQuestionsDb fqDb = new FeedbackQuestionsDb();
+    private static final FeedbackResponseCommentsDb frcDb = new FeedbackResponseCommentsDb();
+    private static final CommentsDb commentsDb = new CommentsDb();
+    
+    protected static EvaluationsLogic evaluationsLogic = EvaluationsLogic.inst();
     
     /**
      * Persists given data in the datastore Works ONLY if the data is correct.
@@ -72,9 +93,14 @@ public class BackDoorLogic extends Logic {
                     account.studentProfile = new StudentProfileAttributes();
                     account.studentProfile.googleId = account.googleId;
                 }
-                super.updateStudentProfile(account.studentProfile);
-                super.updateAccount(account);
+                //super.updateStudentProfile(account.studentProfile);
+                profilesDb.updateStudentProfile(account.studentProfile);
+//                super.updateAccount(account);
+                accountsDb.updateAccount(account, false);
+                
             } catch (EntityDoesNotExistException edne) {
+                //create account need to be checked in both logic and accountsLogic,
+                //so cannot directly call accountsDb here
                 super.createAccount(account.googleId, account.name, account.isInstructor,
                 account.email, account.institute, account.studentProfile);
             }
@@ -92,12 +118,16 @@ public class BackDoorLogic extends Logic {
             if (instructor.googleId != null) {
                 log.fine("API Servlet adding instructor :" + instructor.googleId);
                 try {
-                    super.updateInstructorByGoogleId(instructor.googleId, instructor);
+                    //super.updateInstructorByGoogleId(instructor.googleId, instructor);
+                    instructorsDb.updateInstructorByGoogleId(instructor);
                 } catch (EntityDoesNotExistException e) {
                     if (e.getMessage().equals("Instructor " + instructor.googleId + 
                             " does not belong to course " + instructor.courseId)) {
                         instructorsLogic.deleteInstructor(instructor.courseId, instructor.email);
                     }
+                    
+                    //create Instructor account need to be checked in both logic for role and privileges,
+                    //so cannot directly call accountsDb and instructorsDb here
                     super.createInstructorAccount(
                             instructor.googleId, instructor.courseId, instructor.name,
                             instructor.email, instructor.isArchived, instructor.role,
@@ -107,7 +137,8 @@ public class BackDoorLogic extends Logic {
             } else {
                 log.fine("API Servlet adding instructor :" + instructor.email);
                 try {
-                    super.createInstructor(instructor);
+                    //super.createInstructor(instructor);
+                    instructorsDb.createEntity(instructor);
                 } catch (EntityAlreadyExistsException e) {
                     // ignore if it already exists
                 }
@@ -120,13 +151,21 @@ public class BackDoorLogic extends Logic {
                     + " to course " + student.course);
             student.section = (student.section == null) ? "None" : student.section;
             try {
-                super.updateStudent(student.email, student);
+               
+               //adjustment and validation needed in studentsLogic,
+               //cannot directly call studentsDb here
+               studentsLogic.updateStudentCascade(student.email, student);
+              // super.updateStudent(student.email, student);
             } catch (EntityDoesNotExistException e) {
                 if (student.googleId != null && !student.googleId.isEmpty() 
-                        && super.getAccount(student.googleId) == null) {
+                        && (accountsDb.getAccount(student.googleId, false) == null)) {
+                            
+                    //create account need to be checked in both logic and accountsLogic,
+                    //so cannot directly call accountsDb here
                     super.createAccount(student.googleId, student.name, false, student.email, "NUS");
                 }
-                super.createStudent(student);
+                //submission adjustments needed in studentsLogic so cannot call StudentsDb directly
+                studentsLogic.createStudentCascade(student);
             }
         }
 
@@ -135,10 +174,16 @@ public class BackDoorLogic extends Logic {
             log.fine("API Servlet adding evaluation :" + evaluation.name
                     + " to course " + evaluation.courseId);
             try {
+                
+                //we cannot call evaluationsDb directly because 
+                //setDerivedAttributes must be called in EvaluationsLogic
                 super.updateEvaluation(evaluation.courseId, evaluation.name, 
                         evaluation.instructions.getValue(), evaluation.startTime, evaluation.endTime, 
                         evaluation.timeZone, evaluation.gracePeriod, evaluation.p2pEnabled);
             } catch (EntityDoesNotExistException e) {
+                
+                //we cannot call evaluationsDb here because method createSubmissionsForEvaluation is needed in
+                //EvaluationsLogic
                 createEvaluationWithoutSubmissionQueue(evaluation);
             }
         }
@@ -153,7 +198,9 @@ public class BackDoorLogic extends Logic {
                     + " to " + submission.reviewee);
             submissionsList.add(submission);
         }
-        submissionsLogic.updateSubmissions(submissionsList);
+        //submissionsLogic.updateSubmissions(submissionsList);
+        submissionsDb.updateSubmissions(submissionsList);
+        
         log.fine("API Servlet added " + submissionsList.size() + " submissions");
 
         HashMap<String, FeedbackSessionAttributes> sessions = dataBundle.feedbackSessions;
@@ -162,9 +209,12 @@ public class BackDoorLogic extends Logic {
                     + " to course " + session.courseId); 
             session = cleanSessionData(session);
             try {
+                //unchangeable attributes are tested in FeedbackSessionsLogic so
+                //cannot call FeedbackSessionsDb here
                 super.updateFeedbackSession(session);
             } catch (EntityDoesNotExistException e) {
-                this.createFeedbackSession(session);
+               // this.createFeedbackSession(session);
+                fsDb.createEntity(session);
             }
         }
         
@@ -176,9 +226,12 @@ public class BackDoorLogic extends Logic {
             log.fine("API Servlet adding feedback question :" + question.getId()
                     + " to session " + question.feedbackSessionName);
             try {
-                FeedbackQuestionAttributes fqa = 
-                        this.getFeedbackQuestion(question.feedbackSessionName, question.courseId, question.questionNumber);
+                FeedbackQuestionAttributes fqa = fqDb.getFeedbackQuestion(question.feedbackSessionName, question.courseId, question.questionNumber);
+                //this.getFeedbackQuestion(question.feedbackSessionName, question.courseId, question.questionNumber);
+                
                 if (fqa == null) {
+                    //existence and adjustments are done in FeedbackQeustionsLogic
+                    //so cannot call faDb here
                     super.createFeedbackQuestion(question);
                 }
                 super.updateFeedbackQuestion(question);
@@ -193,8 +246,13 @@ public class BackDoorLogic extends Logic {
                     + " to session " + response.feedbackSessionName);
             response = injectRealIds(response);
             try {
+               //unchangeable attributes check is done in FeedbackResponsesLogic
+               //so cannot call frDb here
                this.updateFeedbackResponse(response);
             } catch(EntityDoesNotExistException e) {
+                
+                //existence check is done in FeedbackResponsesLogic
+                //so cannot call frDb here
                 this.createFeedbackResponse(response);
             }
         }
@@ -205,8 +263,12 @@ public class BackDoorLogic extends Logic {
                     + " to session " + responseComment.feedbackSessionName);
             responseComment = injectRealIds(responseComment);
             try {
-                this.updateFeedbackResponseComment(responseComment);
+                //this.updateFeedbackResponseComment(responseComment);
+                frcDb.updateFeedbackResponseComment(responseComment);    
             } catch(EntityDoesNotExistException e) {
+                
+                //existence check is done in FeedbackResponseCommentsLogic
+                //so cannot call frcDb heres
                 this.createFeedbackResponseComment(responseComment);
             }
         }
@@ -216,9 +278,11 @@ public class BackDoorLogic extends Logic {
             log.fine("API Servlet adding comment :" + comment.getCommentId() + " from "
                     + comment.giverEmail + " to " + comment.recipientType + ":" + comment.recipients + " in course " + comment.courseId);
             try {
-                this.updateComment(comment);
+//                this.updateComment(comment);
+                commentsDb.updateComment(comment);
             } catch(EntityDoesNotExistException e) {
-                this.createComment(comment);
+//                this.createComment(comment);
+                commentsDb.createEntity(comment);
             }
         }
         
@@ -449,10 +513,13 @@ public class BackDoorLogic extends Logic {
             throws EntityAlreadyExistsException, InvalidParametersException, EntityDoesNotExistException {
         Assumption.assertNotNull(ERROR_NULL_PARAMETER, course);
         try {
-            coursesLogic.setArchiveStatusOfCourse(course.id, course.isArchived);
+            //coursesLogic.setArchiveStatusOfCourse(course.id, course.isArchived);
+            coursesDb.updateCourse(course);
         } catch (EntityDoesNotExistException e) {
-            coursesLogic.createCourse(course.id, course.name);
-            coursesLogic.setArchiveStatusOfCourse(course.id, course.isArchived);
+           // coursesLogic.createCourse(course.id, course.name);
+            coursesDb.createEntity(course);
+//            coursesLogic.setArchiveStatusOfCourse(course.id, course.isArchived);
+            
         }
     }
 
