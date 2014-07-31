@@ -2,31 +2,6 @@
 <style>
 /* remove display of original page*/
 #frameBody, #frameTop, #frameBottom{display:none;}
-
-/*Some styles for link, might need it as the css from common.css isn't that nice.
-ul #nav {
-    margin: 0;
-    padding: 0;
-}
-
-#nav li {
-    display: inline;
-    padding: 0;
-    margin: 0;
-}
-
-#nav a:link,#nav a:visited {
-    color: #000;
-    padding: 10px;
-    background: #aaa;
-    text-decoration: none;
-}
-
-#nav a:hover {
-    background: #222;
-    color: #fff;
-}
-*/
 </style>
 
     <div id="noscript-warning">
@@ -45,8 +20,8 @@ ul #nav {
             </ul>
         </div>
 
-        <div id=content>
-            <div id=ie>
+        <div id="content">
+            <div id="ie">
                 <h1>Internet Explorer</h1>
                 Please complete the following instructions to activate and enable
                 JavaScript in Internet Explorer.
@@ -66,7 +41,7 @@ ul #nav {
                 </ol>
             </div>
 
-            <div id=firefox>
+            <div id="firefox">
                 <h1>Firefox</h1>
                 Please complete the following instructions to activate and enable
                 JavaScript in Firefox
@@ -93,7 +68,7 @@ ul #nav {
                 </ol>
             </div>
 
-            <div id=safari>
+            <div id="safari">
                 <h1>Safari</h1>
                 Please complete the following instructions to activate and enable
                 JavaScript in Safari.
@@ -119,7 +94,7 @@ ul #nav {
                </ol>
             </div>
 
-            <div id=opera>
+            <div id="opera">
                 <h1>Opera</h1>
                 Please complete the following instructions to activate and enable
                 JavaScript in Opera.
@@ -150,7 +125,7 @@ ul #nav {
                 </ol>
             </div>
 
-            <div id=chrome>
+            <div id="chrome">
                 <h1>Chrome</h1>
                 Please complete the following instructions to activate and enable
                 JavaScript in Chrome.
