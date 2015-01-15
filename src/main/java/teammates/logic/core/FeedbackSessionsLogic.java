@@ -2177,7 +2177,8 @@ public class FeedbackSessionsLogic {
         }
 
         if (type == FeedbackParticipantType.TEAMS
-                || type == FeedbackParticipantType.OWN_TEAM) {
+            || type == FeedbackParticipantType.OWN_TEAM
+            || (type == FeedbackParticipantType.SELF && name == Const.USER_IS_TEAM)) {
             giverRecipientName = team;
             giverRecipientLastName = team;
             teamName = "";
