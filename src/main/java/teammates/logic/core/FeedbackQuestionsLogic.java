@@ -407,7 +407,12 @@ public class FeedbackQuestionsLogic {
         
         switch (recipientType) {
         case SELF:
-            recipients.put(giver, Const.USER_NAME_FOR_SELF);
+            // if giver are TEAMS, the recipient should be the team itself 
+            if (question.giverType == FeedbackParticipantType.TEAMS) {
+                recipients.put(giverTeam, giverTeam);
+            } else {
+                recipients.put(giver, Const.USER_NAME_FOR_SELF);
+            }
             break;
         case STUDENTS:
             List<StudentAttributes> studentsInCourse =
