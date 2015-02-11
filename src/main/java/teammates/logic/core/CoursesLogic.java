@@ -152,6 +152,10 @@ public class CoursesLogic {
             String googleId) throws EntityDoesNotExistException {
         
         Map<String, StudentAttributes> studentMap = studentsLogic.getStudentMapForGoogleId(googleId);
+        if (studentMap.isEmpty()) {
+            throw new EntityDoesNotExistException("Student with Google ID "
+                    + googleId + " does not exist");
+        }
         List<CourseAttributes> courseList = getCoursesForStudent(new ArrayList<StudentAttributes>(studentMap.values()));
         List<CourseDetailsBundle> courseDetailsList = new ArrayList<CourseDetailsBundle>();
         
