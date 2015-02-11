@@ -2,9 +2,11 @@ package teammates.storage.api;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.jdo.JDOHelper;
@@ -227,6 +229,21 @@ public class StudentsDb extends EntitiesDb {
         }
     
         return studentDataList;
+    }
+
+    public Map<String, StudentAttributes> getStudentMapForGoogleId(String googleId) {
+        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, googleId);
+
+        List<Student> studentList = getStudentEntitiesForGoogleId(googleId);
+
+        Map<String, StudentAttributes> studentMap = new HashMap<String, StudentAttributes>();
+        for (Student student : studentList) {
+            if (!JDOHelper.isDeleted(student)) {
+                studentMap.put(student.getCourseId(), new StudentAttributes(student));
+            }
+        }
+
+        return studentMap;
     }
 
     /**

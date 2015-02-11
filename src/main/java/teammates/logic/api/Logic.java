@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -1077,6 +1078,19 @@ public class Logic {
         Assumption.assertNotNull(ERROR_NULL_PARAMETER, team);
 
         return studentsLogic.getStudentsForTeam(team, courseId);
+    }
+
+    /**
+     * Preconditions: <br>
+     * * All parameters are non-null.
+     * 
+     * @return Empty map if no match found.
+     */
+    public Map<String, StudentAttributes> getStudentMapForGoogleId(String googleId) {
+        
+        Assumption.assertNotNull(ERROR_NULL_PARAMETER, googleId);
+        
+        return studentsLogic.getStudentMapForGoogleId(googleId);
     }
 
     /** 

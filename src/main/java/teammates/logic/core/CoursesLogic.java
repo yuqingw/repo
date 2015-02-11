@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import teammates.common.datatransfer.AccountAttributes;
@@ -151,11 +152,12 @@ public class CoursesLogic {
             String googleId) throws EntityDoesNotExistException {
         
         List<CourseAttributes> courseList = getCoursesForStudentAccount(googleId);
+        Map<String, StudentAttributes> studentMap = studentsLogic.getStudentMapForGoogleId(googleId);
         List<CourseDetailsBundle> courseDetailsList = new ArrayList<CourseDetailsBundle>();
         
         for (CourseAttributes c : courseList) {
 
-            StudentAttributes s = studentsLogic.getStudentForCourseIdAndGoogleId(c.id, googleId);
+            StudentAttributes s = studentMap.get(c.id);
             
             if (s == null) {
                 //TODO Remove excessive logging after the reason why s can be null is found

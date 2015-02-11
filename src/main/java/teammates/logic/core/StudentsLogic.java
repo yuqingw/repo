@@ -3,6 +3,7 @@ package teammates.logic.core;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.mail.internet.MimeMessage;
@@ -130,6 +131,10 @@ public class StudentsLogic {
 
     public List<StudentAttributes> getUnregisteredStudentsForCourse(String courseId) {
         return studentsDb.getUnregisteredStudentsForCourse(courseId);
+    }
+
+    public Map<String, StudentAttributes> getStudentMapForGoogleId(String googleId) {
+        return studentsDb.getStudentMapForGoogleId(googleId);
     }
     
     public void deleteDocument(StudentAttributes student){

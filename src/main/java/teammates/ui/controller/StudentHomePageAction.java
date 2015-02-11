@@ -20,7 +20,7 @@ import teammates.logic.api.GateKeeper;
 public class StudentHomePageAction extends Action {
     
     private StudentHomePageData data;
-    
+    private Map<String, StudentAttributes> students;
 
     @Override
     public ActionResult execute() throws EntityDoesNotExistException {
@@ -28,6 +28,7 @@ public class StudentHomePageAction extends Action {
         new GateKeeper().verifyLoggedInUserPrivileges();
         
         data = new StudentHomePageData(account);
+        students = logic.getStudentMapForGoogleId(account.googleId);
         String recentlyJoinedCourseId = getRequestParamValue(Const.ParamsNames.CHECK_PERSISTENCE_COURSE);
         
         
@@ -106,7 +107,7 @@ public class StudentHomePageAction extends Action {
 
     private String getStudentStatusForEval(EvaluationAttributes eval, String googleId){
         
-        StudentAttributes student = logic.getStudentForGoogleId(eval.courseId, googleId);
+        StudentAttributes student = students.get(eval.courseId);
         Assumption.assertNotNull(student);
 
         String studentEmail = student.email;
@@ -135,7 +136,7 @@ public class StudentHomePageAction extends Action {
     
     private boolean getStudentStatusForSession(FeedbackSessionAttributes fs, String googleId){
         
-        StudentAttributes student = logic.getStudentForGoogleId(fs.courseId, googleId);
+        StudentAttributes student = students.get(fs.courseId);
         Assumption.assertNotNull(student);
 
         String studentEmail = student.email;

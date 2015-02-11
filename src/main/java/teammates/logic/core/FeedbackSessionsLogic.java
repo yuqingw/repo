@@ -908,13 +908,7 @@ public class FeedbackSessionsLogic {
             return true;
         }
 
-        for (FeedbackQuestionAttributes question : allQuestions) {
-            if (fqLogic.isQuestionAnsweredByUser(question, userEmail)) {
-                // If any question is answered, session is complete.
-                return true;
-            }
-        }
-        return false;
+        return frLogic.hasGiverRespondedForSession(userEmail, feedbackSessionName, courseId);
     }
 
     public boolean isFeedbackSessionCompletedByInstructor(
