@@ -2244,13 +2244,6 @@ public class FeedbackSessionsLogic {
             FeedbackSessionAttributes session,
             String userEmail) throws EntityDoesNotExistException {
 
-        if (fsDb.getFeedbackSession(
-                session.courseId,
-                session.feedbackSessionName) == null) {
-            throw new EntityDoesNotExistException(
-                    "Trying to get a feedback session that does not exist.");
-        }
-
         // Check for private type first.
         if (session.feedbackSessionType == FeedbackSessionType.PRIVATE) {
             return session.creatorEmail.equals(userEmail);
