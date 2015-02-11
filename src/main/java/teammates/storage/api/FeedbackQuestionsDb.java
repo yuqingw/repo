@@ -122,6 +122,23 @@ public class FeedbackQuestionsDb extends EntitiesDb {
         }
         return fqList;
     }
+
+    public List<FeedbackQuestionAttributes> getFeedbackQuestionsForGiverTypeWithinRange(
+            String feedbackSessionName, String courseId, FeedbackParticipantType giverType, int range) {
+
+        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, feedbackSessionName);
+        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, courseId);
+        Assumption.assertNotNull(Const.StatusCodes.DBLEVEL_NULL_INPUT, giverType);
+
+        List<FeedbackQuestion> questions = getFeedbackQuestionEntitiesForGiverTypeWithinRange(
+                feedbackSessionName, courseId, giverType, range);
+        List<FeedbackQuestionAttributes> fqList = new ArrayList<FeedbackQuestionAttributes>();
+
+        for (FeedbackQuestion question : questions) {
+            fqList.add(new FeedbackQuestionAttributes(question));
+        }
+        return fqList;
+    }
     
     /**
      * Preconditions: <br>
@@ -273,6 +290,25 @@ public class FeedbackQuestionsDb extends EntitiesDb {
         q.setFilter("feedbackSessionName == feedbackSessionNameParam && " +
                 "courseId == courseIdParam && " +
                 "giverType == giverTypeParam ");
+        
+        @SuppressWarnings("unchecked")
+        List<FeedbackQuestion> feedbackQuestionList = 
+            (List<FeedbackQuestion>) q.execute(feedbackSessionName, courseId, giverType);
+        
+        return feedbackQuestionList;
+    }
+
+    private List<FeedbackQuestion> getFeedbackQuestionEntitiesForGiverTypeWithinRange(
+            String feedbackSessionName, String courseId, FeedbackParticipantType giverType, int range) {
+        Query q = getPM().newQuery(FeedbackQuestion.class);
+        q.declareParameters("String feedbackSessionNameParam, " +
+                "String courseIdParam, " +
+                "FeedbackParticipantType giverTypeParam");
+        q.declareImports("import teammates.common.datatransfer.FeedbackParticipantType");
+        q.setFilter("feedbackSessionName == feedbackSessionNameParam && " +
+                "courseId == courseIdParam && " +
+                "giverType == giverTypeParam ");
+        q.setRange(0, range + 1);
         
         @SuppressWarnings("unchecked")
         List<FeedbackQuestion> feedbackQuestionList = 

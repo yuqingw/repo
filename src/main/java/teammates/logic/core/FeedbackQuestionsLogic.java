@@ -297,6 +297,23 @@ public class FeedbackQuestionsLogic {
         
         return questions;
     }
+
+    public boolean hasFeedbackQuestionForStudents(
+            String feedbackSessionName, String courseId)
+                    throws EntityDoesNotExistException {
+          
+        boolean hasStudentQuestions = !fqDb.getFeedbackQuestionsForGiverTypeWithinRange(
+                                                feedbackSessionName, courseId, STUDENTS, 1).isEmpty();
+        if (hasStudentQuestions) {
+            return true;
+        }
+        boolean hasTeamQuestions = !fqDb.getFeedbackQuestionsForGiverTypeWithinRange(
+                                                feedbackSessionName, courseId, TEAMS, 1).isEmpty();
+        if  (hasTeamQuestions) {
+            return true;
+        }
+        return false;
+    }
     
     /**
      * Gets a given {@code FeedbackQuestion} and its previously filled {@code FeedbackResponses}

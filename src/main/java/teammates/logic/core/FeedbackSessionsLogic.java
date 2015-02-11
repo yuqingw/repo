@@ -140,6 +140,34 @@ public class FeedbackSessionsLogic {
             String courseId, String userEmail)
             throws EntityDoesNotExistException {
 
+        return getFeedbackSessionsForUserInCourse(courseId, userEmail, false);
+    }
+
+    /**
+     * 
+     * @param courseId
+     * @param userEmail
+     * @return a list of viewable feedback sessions for any student for his course.
+     * @throws EntityDoesNotExistException
+     */
+    public List<FeedbackSessionAttributes> getFeedbackSessionsForStudentInCourse(
+            String courseId, String userEmail)
+            throws EntityDoesNotExistException {
+
+        return getFeedbackSessionsForUserInCourse(courseId,userEmail, true);
+    }
+
+    /**
+     * 
+     * @param courseId
+     * @param userEmail
+     * @param isStudent
+     * @return a list of viewable feedback sessions for user for his course depending on whether he is student.
+     * @throws EntityDoesNotExistException
+     */
+    private List<FeedbackSessionAttributes> getFeedbackSessionsForUserInCourse(
+            String courseId, String userEmail, boolean isStudent)
+            throws EntityDoesNotExistException {
         if (coursesLogic.isCoursePresent(courseId) == false) {
             throw new EntityDoesNotExistException(
                     "Trying to get feedback sessions for a course that does not exist.");
@@ -149,7 +177,13 @@ public class FeedbackSessionsLogic {
                 getFeedbackSessionsForCourse(courseId);
         List<FeedbackSessionAttributes> viewableSessions = new ArrayList<FeedbackSessionAttributes>();
         for (FeedbackSessionAttributes session : sessions) {
-            if (isFeedbackSessionViewableTo(session, userEmail)) {
+            boolean isViewableSession;
+            if (isStudent) {
+                isViewableSession = isFeedbackSessionViewableToStudents(session);
+            } else {
+                isViewableSession = isFeedbackSessionViewableTo(session, userEmail); 
+            }
+            if (isViewableSession) {
                 viewableSessions.add(session);
             }
         }
@@ -2267,11 +2301,10 @@ public class FeedbackSessionsLogic {
         // Allow students to view if there are questions for them
         // TODO this is a bug. For example if instructors have feedback for the
         // class
-        List<FeedbackQuestionAttributes> questions =
-                fqLogic.getFeedbackQuestionsForStudents(
-                        session.feedbackSessionName, session.courseId);
+        boolean hasQuestions = fqLogic.hasFeedbackQuestionForStudents(
+                                         session.feedbackSessionName, session.courseId);
 
-        return (session.isVisible() && !questions.isEmpty()) ? true : false;
+        return session.isVisible() && hasQuestions;
     }
 
     private void normalizeMaximumResponseEntities(
