@@ -151,8 +151,8 @@ public class CoursesLogic {
     public List<CourseDetailsBundle> getCourseDetailsListForStudent(
             String googleId) throws EntityDoesNotExistException {
         
-        List<CourseAttributes> courseList = getCoursesForStudentAccount(googleId);
         Map<String, StudentAttributes> studentMap = studentsLogic.getStudentMapForGoogleId(googleId);
+        List<CourseAttributes> courseList = getCoursesForStudent(new ArrayList<StudentAttributes>(studentMap.values()));
         List<CourseDetailsBundle> courseDetailsList = new ArrayList<CourseDetailsBundle>();
         
         for (CourseAttributes c : courseList) {
@@ -489,14 +489,17 @@ public class CoursesLogic {
     }
     
     public List<CourseAttributes> getCoursesForStudentAccount(String googleId) throws EntityDoesNotExistException {
-        
+
         List<StudentAttributes> studentDataList = studentsLogic.getStudentsForGoogleId(googleId);
-        
         if (studentDataList.size() == 0) {
             throw new EntityDoesNotExistException("Student with Google ID "
                     + googleId + " does not exist");
         }
         
+        return getCoursesForStudent(studentDataList);
+    }
+
+    private List<CourseAttributes> getCoursesForStudent(List<StudentAttributes> studentDataList) {
         ArrayList<CourseAttributes> courseList = new ArrayList<CourseAttributes>();
 
         for (StudentAttributes s : studentDataList) {
