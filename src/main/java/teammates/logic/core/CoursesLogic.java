@@ -182,7 +182,7 @@ public class CoursesLogic {
             List<EvaluationAttributes> evaluationDataList = evaluationsLogic
                     .getEvaluationsForCourse(c.id);            
             List<FeedbackSessionAttributes> feedbackSessionList = 
-                    feedbackSessionsLogic.getFeedbackSessionsForUserInCourse(c.id, s.email);
+                    feedbackSessionsLogic.getFeedbackSessionsForStudentInCourse(c.id, s.email);
             
             CourseDetailsBundle cdd = new CourseDetailsBundle(c);
             
