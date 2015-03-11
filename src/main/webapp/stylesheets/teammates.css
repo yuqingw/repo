@@ -236,19 +236,24 @@ h2 {
     padding: 0px 0px 0px 10px;
 }
 
-@media (max-width: 799px)
+@media (max-width: 999px)
 {   
 /*  #mainContent{
     background-color:  red;
     }  */
     
-    body, html { overflow-x:hidden; }
+    body, html { 
+        overflow-x:hidden; 
+    }
     #img-1, #img-2, #img-3{
-        padding: 0px 0px 0px 70px !important;
+        width: 100%;
+        text-align: center;
     }
     
     .overviewBytePicture{
-      padding-left: 100px !important;
+       max-width: 690px !important;
+       width: 100%!important;
+       text-align: center;
      }
      
      #textHolder {
@@ -278,7 +283,8 @@ h2.subcaption {
 
 .overviewBytePicture {
     float: left;
-    width: 150px;
+    max-width: 150px;
+    width: 100%;
 }
 
 .overviewByteHeading {
