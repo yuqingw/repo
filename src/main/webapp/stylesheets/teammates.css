@@ -4,6 +4,8 @@
    --------------------------------  CSS Reset  -----------------------------------------
 */
 
+
+
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -102,7 +104,8 @@ h2 {
 
 #headerWrapper {
     margin: 0px auto;
-    width: 1000px;
+    max-width: 1000px;
+    width: 100%;
 }
 
 #imageHolder {
@@ -122,7 +125,8 @@ h2 {
 
 #loginHolder {
     float: right;
-    width: 300px;
+    max-width: 300px;
+    width:100%;
 }
 
 #navbar {
@@ -192,7 +196,8 @@ h2 {
 }
 
 #mainContent {
-    width: 1000px;
+    max-width: 1000px;
+    width: 100%;
     margin: 0px auto;
 }
 
@@ -207,7 +212,8 @@ h2 {
 
 #caption {
     margin: 30px auto;
-    width: 800px;
+    max-width: 800px;
+    width: 100%;
     color: #e46d0b;
     font-weight: bold;
     font-size: 20px;
@@ -216,8 +222,41 @@ h2 {
 
 #contentHolder {
     margin: 30px auto;
-    width: 800px;
+    width: 100%;
+    max-width: 800px;
 }
+
+/* .img-row{
+    padding: 0px 0px 110px 0px;
+} */
+
+
+.img-row #img-1, #img-2, #img-3{
+    display: inline-block;
+    padding: 0px 0px 0px 10px;
+}
+
+@media (max-width: 799px)
+{   
+/*  #mainContent{
+    background-color:  red;
+    }  */
+    
+    body, html { overflow-x:hidden; }
+    #img-1, #img-2, #img-3{
+        padding: 0px 0px 0px 70px !important;
+    }
+    
+    .overviewBytePicture{
+      padding-left: 100px !important;
+     }
+     
+     #textHolder {
+        display:none !important;
+    }
+    
+}
+
 
 h2.subcaption {
     color: #4379D1;
@@ -252,7 +291,8 @@ h2.subcaption {
 
 .overviewByteData {
     float: right;
-    width: 600px;
+    max-width: 600px;
+    width: 100%;
     padding-left: 30px;
     color: gray;
 }
@@ -299,11 +339,13 @@ h2.subcaption {
    margin: 0 auto;
    position: relative;
    top: 0;
-   width: 1024px;
+   max-width: 1024px;
+   width:100%;
 }
 
 #footerLeftCol {
-   width: 500px;
+   max-width: 500px;
+   width:100%;
    text-align: right;
    float: left;
 }
@@ -311,7 +353,8 @@ h2.subcaption {
 #footerRightCol {
    float: left;
    margin-left: 570px;
-   width: 450px;
+   max-width: 450px;
+   width: 100%;
 }
 
 #footer a:link {
